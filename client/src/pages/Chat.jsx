@@ -148,13 +148,15 @@ const Chat = () => {
   const messagesEndRef              = useRef(null);
 
   /* Init socket + fetch users */
-  useEffect(() => {
+ useEffect(() => {
     API.get('/chat/users')
       .then(res => setUsers(res.data))
       .catch(console.error)
       .finally(() => setIsLoading(false));
 
-    const sock = io('http://localhost:5000');
+    // CHANGE THIS LINE: Use your live Render backend, NOT localhost!
+    const sock = io('https://agrolink-fnwu.onrender.com'); 
+    
     setSocket(sock);
     if (user?._id) sock.emit('join', user._id);
     sock.on('receiveMessage', msg => setMessages(prev => [...prev, msg]));
@@ -185,13 +187,29 @@ const Chat = () => {
   }, [messages]);
 
   /* Send */
-  const handleSend = (e) => {
+const handleSend = async (e) => {
     e?.preventDefault();
     if (!newMessage.trim() || !activeChat || !socket) return;
-    const msg = { senderId: user._id, receiverId: activeChat._id, content: newMessage };
-    socket.emit('sendMessage', msg);
-    setMessages(prev => [...prev, { ...msg, _id: Date.now(), createdAt: new Date() }]);
-    setNewMessage('');
+    
+    const messageText = newMessage;
+    setNewMessage(''); // Clear input immediately so it feels fast
+    
+    try {
+      // 1. Save it to MongoDB permanently
+      const res = await API.post('/chat/send', { 
+        receiverId: activeChat._id, 
+        content: messageText 
+      });
+      
+      // 2. Put it on your screen
+      setMessages(prev => [...prev, res.data]);
+      
+      // 3. Shoot it through the socket to the other person instantly
+      socket.emit('sendMessage', res.data);
+      
+    } catch (error) {
+      console.error("Failed to send message to database:", error);
+    }
   };
 
   const filteredUsers = users.filter(u =>

@@ -2,10 +2,9 @@
 const Message = require('../models/Message');
 const User = require('../models/User');
 
-// Get chat history between the logged-in user and another specific user
 const getChatHistory = async (req, res) => {
   try {
-    const { userId } = req.params; // The person we are chatting with
+    const { userId } = req.params; 
     const myId = req.user._id;
 
     const messages = await Message.find({
@@ -13,7 +12,7 @@ const getChatHistory = async (req, res) => {
         { sender: myId, receiver: userId },
         { sender: userId, receiver: myId }
       ]
-    }).sort({ createdAt: 1 }); // Oldest to newest
+    }).sort({ createdAt: 1 }); 
 
     res.json(messages);
   } catch (error) {
@@ -21,10 +20,8 @@ const getChatHistory = async (req, res) => {
   }
 };
 
-// Get a list of all users to start a chat with (For demo purposes)
 const getUsersToChat = async (req, res) => {
   try {
-    // Return all users EXCEPT the currently logged-in user
     const users = await User.find({ _id: { $ne: req.user._id } }).select('name avatar role location');
     res.json(users);
   } catch (error) {
@@ -32,4 +29,23 @@ const getUsersToChat = async (req, res) => {
   }
 };
 
-module.exports = { getChatHistory, getUsersToChat };
+// ADD THIS NEW FUNCTION:
+const sendMessage = async (req, res) => {
+  try {
+    const { receiverId, content } = req.body;
+    
+    // Create and save the message to MongoDB
+    const newMessage = await Message.create({
+      sender: req.user._id,
+      receiver: receiverId,
+      content: content
+    });
+
+    res.status(201).json(newMessage);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to save message', error: error.message });
+  }
+};
+
+// DON'T FORGET TO EXPORT IT!
+module.exports = { getChatHistory, getUsersToChat, sendMessage };
