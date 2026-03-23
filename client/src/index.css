@@ -1,0 +1,17 @@
+/* client/src/index.css */
+@import "tailwindcss";
+
+@theme {
+  /* This creates your custom brand colors in v4 */
+  --color-brand-dark: #1a3a1f;
+  --color-brand-mid: #2d6a35;
+  --color-brand-light: #4a9455;
+  --color-brand-pale: #b8ddb8;
+  --color-brand-mist: #e8f5e8;
+}
+
+body {
+  background-color: #faf8f2;
+  color: #1a1a12;
+  font-family: system-ui, -apple-system, sans-serif;
+}
