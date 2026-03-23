@@ -7,7 +7,7 @@ import axios from 'axios';
 import {
   CloudRain, Sun, Cloud, Scan, MessageSquare, ShoppingBag,
   Award, ChevronRight, Leaf, Sparkles, Loader2, MapPin,
-  Wind, Droplets, Thermometer,
+  Wind, Droplets, Thermometer,MessageCircle
 } from 'lucide-react';
 
 /* ─── Quick action config ────────────────────────────────────────── */
@@ -42,6 +42,16 @@ const ACTIONS = [
     bg: '#fffbeb',
     iconBg: '#fef3c7',
   },
+  {
+    to: '/chat',
+    icon: MessageCircle,
+    title: 'Live Expert Chat',
+    desc: 'Message agronomists directly in real-time',
+    cta: 'Start chatting',
+    accent: '#8b5cf6', // A nice purple color
+    bg: '#f5f3ff',
+    iconBg: '#ede9fe',
+  }
 ];
 
 /* ─── Weather icon helper ────────────────────────────────────────── */
