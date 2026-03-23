@@ -3,107 +3,119 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const http = require('http'); // Required for Socket.io
-const { Server } = require('socket.io'); // Required for Socket.io
+const http = require('http'); 
+const { Server } = require('socket.io'); 
+
+// --- MODELS (Imported ONCE at the top for performance) ---
+const Message = require('./models/Message');
+const Notification = require('./models/Notification');
+const User = require('./models/User');
+
+// --- ROUTES ---
 const userRoutes = require('./routes/user.routes');  
-// Import Routes
 const authRoutes = require('./routes/auth.routes');
 const postRoutes = require('./routes/post.routes');
 const productRoutes = require('./routes/product.routes');
 const scannerRoutes = require('./routes/scanner.routes');
-const chatRoutes = require('./routes/chat.routes'); // NEW Chat Route
-const notificationRoutes = require('./routes/notification.routes'); // NEW Notification Route
+const chatRoutes = require('./routes/chat.routes'); 
+const notificationRoutes = require('./routes/notification.routes'); 
 
 const app = express();
 
-// Middleware
+// --- MIDDLEWARE ---
 app.use(express.json());
-app.use(cors());
+app.use(cors()); // Allows your Vercel frontend to talk to this Render backend
 app.use(express.urlencoded({ extended: true }));
 
-// Wrap Express in HTTP Server for Socket.io
+// --- SOCKET.IO SETUP ---
+// Wrap Express in an HTTP Server so Socket.io can attach to it
 const server = http.createServer(app);
 
-// Configure Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Replace if your React app runs on a different port
+    origin: "*", 
     methods: ["GET", "POST"]
   }
 });
 
-// THE MAGIC LINE: Makes 'io' globally available to your controllers (like post.controller)
+// Make 'io' globally available to your controllers (e.g., req.app.get('io'))
 app.set('io', io);
 
-// Socket.IO Logic
+// --- REAL-TIME SOCKET LOGIC ---
 io.on('connection', (socket) => {
   console.log('⚡ A user connected to real-time engine:', socket.id);
 
-  // Join personal room based on User ID
+  // 1. Join personal room based on their MongoDB User ID
   socket.on('join', (userId) => {
-    socket.join(userId);
-    console.log(`User ${userId} joined their personal room.`);
+    if (userId) {
+      socket.join(userId);
+      console.log(`User ${userId} joined their personal room.`);
+    }
   });
 
-  // Handle sending messages & triggering notifications
+  // 2. Handle sending messages & triggering notifications
   socket.on('sendMessage', async (data) => {
     try {
-      const Message = require('./models/Message');
-      const Notification = require('./models/Notification');
-      const User = require('./models/User');
+      // Safety Check: Prevent server crash if data is missing
+      if (!data.senderId || !data.receiverId || !data.content) {
+        console.error('Socket Error: Missing message data');
+        return; 
+      }
 
-      // 1. Save Chat Message to DB
+      // 1. Save Chat Message to DB permanently
       const savedMessage = await Message.create({
         sender: data.senderId,
         receiver: data.receiverId,
         content: data.content
       });
 
-      // 2. Fetch sender name for the notification
-      const sender = await User.findById(data.senderId);
+      // 2. Fetch sender's name to make the notification look nice
+      const sender = await User.findById(data.senderId).select('name');
+      const senderName = sender ? sender.name : 'A Farmer';
 
-      // 3. Create a Notification in the DB for the offline/history fallback
+      // 3. Create a Notification in the DB (For offline users)
       const notif = await Notification.create({
         recipient: data.receiverId,
-        message: `New message from ${sender.name}`,
+        message: `New message from ${senderName}`,
         type: 'message',
         link: '/chat'
       });
 
-      // 4. Emit BOTH the chat message and the notification to the receiver's room instantly
+      // 4. Fire them both off instantly to the receiver's room
       io.to(data.receiverId).emit('receiveMessage', savedMessage);
       io.to(data.receiverId).emit('newNotification', notif);
       
     } catch (error) {
-      console.error('Socket message error:', error);
+      console.error('Socket message processing failed:', error);
     }
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+    console.log('User disconnected from socket:', socket.id);
   });
 });
 
-// Mount Routes
+// --- MOUNT ROUTES ---
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes); 
 app.use('/api/posts', postRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/scanner', scannerRoutes);
-app.use('/api/chat', chatRoutes); // Mounted
-app.use('/api/notifications', notificationRoutes); // Mounted
-app.use('/api/users', userRoutes); // Mounted User Routes
+app.use('/api/chat', chatRoutes); 
+app.use('/api/notifications', notificationRoutes); 
 
-// Database Connection & Server Start
+// --- DATABASE CONNECTION & SERVER BOOT ---
 const PORT = process.env.PORT || 5000;
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log('MongoDB Connected Successfully');
-    // IMPORTANT: Use server.listen instead of app.listen to keep Socket.IO alive
+    console.log('✅ MongoDB Connected Successfully');
+    
+    // IMPORTANT: Use server.listen so both Express API and Socket.io run together
     server.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    console.error('MongoDB connection failed:', error);
+    console.error('❌ MongoDB connection failed:', error);
   });
