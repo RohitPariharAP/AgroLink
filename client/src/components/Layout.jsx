@@ -9,7 +9,7 @@ import {
   Scan,
   LogOut,
   Leaf,
-  Sparkles,
+  Sparkles,MessageCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import NotificationBell from "./NotificationBell";
@@ -26,6 +26,7 @@ const NAV = [
     label: "Shop",
   },
   { name: "Crop Scanner", path: "/scanner", icon: Scan, label: "AI Scanner" },
+  { name: "Live Chat", path: "/chat", icon: MessageCircle, label: "Expert Support" }
 ];
 
 /* ─── Sidebar Nav Item ───────────────────────────────────────────── */
