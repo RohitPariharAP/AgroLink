@@ -215,12 +215,7 @@ const Sidebar = ({ currentPath, user, onLogout, onClose, mobile }) => (
           >
             {user?.name}
           </p>
-          <div className="flex items-center gap-1 mt-0.5">
-            <Sparkles className="w-2.5 h-2.5 text-amber-400" />
-            <p className="text-[10px] text-amber-500 font-semibold">
-              {user?.rewardPoints || 0} pts
-            </p>
-          </div>
+         
         </div>
         {/* Online indicator */}
         <div
@@ -395,17 +390,7 @@ const Layout = () => {
 
             {/* Right */}
             <div className="flex items-center gap-2">
-              {/* Points */}
-              <motion.div
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-amber-600"
-                style={{ background: "#fffbeb", border: "1.5px solid #fde68a" }}
-                whileHover={{ scale: 1.04 }}
-              >
-                <span>🌾</span>
-                <span style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                  {user?.rewardPoints || 0}
-                </span>
-              </motion.div>
+             
 
               <NotificationBell />
 

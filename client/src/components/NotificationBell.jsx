@@ -24,7 +24,7 @@ const NotificationBell = () => {
     fetchHistory();
 
     // Setup Socket
-    const socket = io('http://localhost:5000');
+    const socket = io('https://agrolink-fnwu.onrender.com');
     socket.emit('join', user._id);
 
     // Listen for incoming live notifications
