@@ -227,13 +227,7 @@ const Dashboard = () => {
               </div>
 
               {/* Points badge */}
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 18px', borderRadius: 14, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)' }}>
-                <Award style={{ width: 18, height: 18, color: '#fde68a' }} />
-                <div>
-                  <p style={{ fontSize: 18, fontWeight: 900, color: '#fff', margin: 0, lineHeight: 1 }}>{user?.rewardPoints || 0}</p>
-                  <p style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.5)', margin: '2px 0 0', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Reward Points</p>
-                </div>
-              </div>
+           
             </div>
           </motion.div>
 

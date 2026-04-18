@@ -515,7 +515,7 @@ const Forum = () => {
                 <Avatar user={user} size={10} />
                 <div>
                   <p className="text-sm font-bold text-slate-800" style={{ fontFamily: "'DM Sans', sans-serif" }}>{user?.name}</p>
-                  <p className="text-xs text-emerald-500 font-semibold">{user?.rewardPoints || 0} pts earned</p>
+                  
                 </div>
               </div>
 

@@ -357,7 +357,7 @@ const Profile = () => {
 
             {/* Stats row */}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <StatPill icon={Award}        label="Points"   value={user.rewardPoints || 0} color="#f59e0b" />
+             
               <StatPill icon={MessageSquare} label="Posts"   value={posts.length}            color="#3dd68c" />
               <StatPill icon={ShoppingBag}  label="Listings" value={products.length}         color="#60a5fa" />
             </div>
